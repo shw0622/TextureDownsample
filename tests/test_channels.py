@@ -62,3 +62,18 @@ def test_ao_box_average():
     out = downsample_ao(AO, factor=2)
     assert out.shape == (2, 2, 1)
     np.testing.assert_allclose(out, 0.8, atol=1e-6)
+
+
+def test_roughness_lean_rejects_spatial_mismatch():
+    R = np.full((4, 4, 1), 0.5, dtype=np.float32)
+    N = np.zeros((2, 2, 3), dtype=np.float32)
+    N[..., 2] = 1.0
+    with pytest.raises(ValueError):
+        downsample_roughness_lean(R, N, factor=2)
+
+
+def test_metallic_and_ao_reject_wrong_channels():
+    with pytest.raises(ValueError):
+        downsample_metallic(np.zeros((4, 4, 3), dtype=np.float32), factor=2)
+    with pytest.raises(ValueError):
+        downsample_ao(np.zeros((4, 4, 3), dtype=np.float32), factor=2)

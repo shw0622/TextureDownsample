@@ -1,6 +1,6 @@
 """PBR 5 通道下采样：normal / roughness(LEAN) / metallic / ao。
 
-提取自 pbr_compress/analytic.py。roughness 用 LEAN 各向同性 Toksvig 近似，把
+提取自 pbr_compress/analytic.py。roughness 用 LEAN 各向同性近似（Dupuy 2013），把
 footprint 内法线方差吸收进粗糙度。
 """
 from __future__ import annotations
@@ -24,8 +24,7 @@ def downsample_roughness_lean(
 ) -> np.ndarray:
     """LEAN 方差补偿 roughness 下采样。
 
-        alpha_hr   = R_hr ** 2
-        alpha2_avg = box((alpha_hr)^2)
+        alpha2_avg = box((R_hr ** 2) ** 2)      # = box(R_hr ** 4)
         sigma2     = clip((1 - |box(N_hr)|^2) / 2, 0, inf)
         alpha2_lr  = alpha2_avg + 2 * sigma2
         R_lr       = clip(sqrt(sqrt(alpha2_lr)), 0, 1)
@@ -54,7 +53,10 @@ def downsample_roughness_lean(
 def downsample_metallic(
     M_hr: np.ndarray, threshold: float = 0.5, factor: int = 2
 ) -> np.ndarray:
-    """Metallic factor× 下采样：box average + 二值阈值（金属/非金属是物理跳变）。"""
+    """Metallic factor× 下采样：box average + 二值阈值（金属/非金属是物理跳变）。
+
+    本管线输入为 float32，输出 {0.0, 1.0}；整数输入会得到 {0,1} 而非原量纲，故仅支持 float 输入。
+    """
     if M_hr.ndim != 3 or M_hr.shape[-1] != 1:
         raise ValueError("downsample_metallic: M_hr 末维必须为 1")
     M_avg = box_downsample(M_hr, factor=factor)
