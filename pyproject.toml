@@ -1,19 +1,7 @@
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
-[project]
-name = "dpid-lean-pipeline"
-version = "0.1.0"
-description = "DPID albedo + LEAN roughness PBR texture downsample pipeline (no optimization)"
-requires-python = ">=3.10"
-dependencies = ["numpy", "scipy", "imageio"]
-
-[project.optional-dependencies]
-dev = ["pytest"]
-
-[tool.setuptools.packages.find]
-include = ["dpid_lean*"]
+# 开发期配置：本项目暂不打包安装（still in development）。
+# 在项目根目录用 `python -m pytest` 跑测试；pythonpath=. 让测试无需安装即可
+# import dpid_lean。需要依赖时用 `pip install -r requirements.txt`。
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
