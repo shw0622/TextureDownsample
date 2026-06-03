@@ -11,7 +11,7 @@ from scipy.ndimage import uniform_filter
 def box_downsample(x: np.ndarray, factor: int = 2) -> np.ndarray:
     """逐 factor×factor 块求平均下采样。
 
-    x: (H, W, C)，H/W 必须能被 factor 整除。返回 (H/factor, W/factor, C)，同 dtype。
+    x: (H, W, C)，H/W 必须能被 factor 整除。返回 (H/factor, W/factor, C)；整数输入会被 mean 提升为 float。
     """
     if x.ndim != 3:
         raise ValueError(f"box_downsample: 期望 3D 输入 (H, W, C)，实际 ndim={x.ndim}")
@@ -35,6 +35,7 @@ def dpid_downsample(
     """DPID（Detail-Preserving Image Downscaling）factor× 下采样。
 
     与局部均值距离越远的像素权重越大，保留细节。
+    lam > 0 上权重给细节；lam = 0 退化为均匀权重（等价 box）；负值未定义。
     img: (H, W, C) float，H/W 必须能被 factor 整除。返回 (H/factor, W/factor, C)。
     """
     if img.ndim != 3:
