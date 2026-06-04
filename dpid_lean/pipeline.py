@@ -10,8 +10,7 @@ from dpid_lean.channels import (
     downsample_metallic,
     downsample_ao,
 )
-
-PBRSet = tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]
+from dpid_lean.io_dataset import PBRSet
 
 _DPID_LAM = 1.0
 _DPID_SUPPORT = 4

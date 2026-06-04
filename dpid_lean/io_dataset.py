@@ -88,19 +88,18 @@ def load_asset(asset_dir: Path) -> tuple[PBRSet, str, str, str]:
     """Return ((A,N,R,M,AO), layout, d_stem, n_stem). Albedo is linear."""
     folder = _texture_dir(Path(asset_dir))
 
-    # prefer character (_d/_n suffix), then packed (d/n token)
-    # layout 由匹配到的文件名推断，规则与 detect_layout() 一致：_d/_n 后缀=character，否则 d/n token=packed
+    # 先按 _d/_n 后缀找（character 命名），找不到再按 d/n token 找（packed 命名）
     p_d = _find_by_suffix(folder, "_d")
     p_n = _find_by_suffix(folder, "_n")
-    if p_d is not None and p_n is not None:
-        layout = "character"
-    else:
+    if p_d is None or p_n is None:
         p_d = _find_by_token(folder, "d")
         p_n = _find_by_token(folder, "n")
-        layout = "packed"
 
     if p_d is None or p_n is None:
         raise FileNotFoundError(f"no _d/_n textures found in {folder}")
+
+    # 单一来源判定布局：由实际匹配到的文件名 stem 决定
+    layout = detect_layout(p_d.stem, p_n.stem)
 
     raw_d = _to01(iio.imread(str(p_d)))
     raw_n = _to01(iio.imread(str(p_n)))
