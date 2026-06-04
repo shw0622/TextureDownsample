@@ -21,7 +21,7 @@ python run.py --src-dir <asset_folder> [--out out] [--factor 2] [--metal thresho
 
 | 通道 | 方法 |
 |------|------|
-| Albedo | DPID（lam=1.0, support=4，无锐化） |
+| Albedo | DPID（lam=1.0, support=4） |
 | Normal | box 平均 + 重归一化 |
 | Roughness | LEAN 方差补偿（吸收 footprint 法线方差） |
 | Metallic | box 平均 + 二值阈值 0.5（默认）/ box 平均（avg） |
