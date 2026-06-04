@@ -1,10 +1,5 @@
 # DPID + LEAN PBR Downsample Pipeline
 
-把 PBR 贴图按 **DPID albedo + LEAN roughness** 做下采样的独立工具。
-无优化、无渲染评估，纯转换。依赖仅 numpy / scipy / imageio。
-
-开发期不打包安装；在项目根目录直接运行。
-
 ## 安装依赖
 
 ```bash
@@ -42,17 +37,3 @@ python run.py --src-dir <asset_folder> [--out out] [--factor 2] [--metal thresho
   `_d` = RGB albedo(sRGB)（无 AO，默认 1.0）；`_n` = R(metal) G(nx) B(rough) A(ny)。
 
 normalZ 不存储，由 `z=√(1-x²-y²)` 重建。输出始终 8-bit。
-
-## 测试
-
-```bash
-pip install -r requirements.txt && pip install pytest
-python -m pytest -v
-```
-
-## 设计说明
-
-这条管线是从实验仓 `texture_downsample` 提取的「无优化基础路径」。实验结论：
-在其之上再做粗糙度/法线残差优化（r/nr）收益微薄甚至过拟合弃权；albedo 方向(ar)有
-小幅稳定收益。粗糙度残差优化在金属/低粗糙材质上有微小收益、在漫反射材质上无收益。
-本项目固化这条「DPID albedo + LEAN roughness」基础路径，不含优化与评估。
