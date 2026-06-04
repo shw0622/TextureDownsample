@@ -45,3 +45,20 @@ def test_downsample_asset_metal_avg_keeps_soft():
 def test_downsample_asset_rejects_bad_metal_mode():
     with pytest.raises(ValueError):
         downsample_asset(_make_pbr(4, 4), factor=2, metal_mode="nope")
+
+
+def test_albedo_routed_through_dpid_not_box():
+    # one bright pixel surrounded by zeros: DPID up-weights the outlier, so the
+    # downsampled peak is higher than a plain box average would give. This proves
+    # albedo goes through dpid_downsample, not box_downsample.
+    from dpid_lean.filters import box_downsample
+    A = np.zeros((8, 8, 3), dtype=np.float32)
+    A[3, 3] = 1.0
+    N = np.zeros((8, 8, 3), dtype=np.float32)
+    N[..., 2] = 1.0
+    R = np.full((8, 8, 1), 0.5, dtype=np.float32)
+    M = np.zeros((8, 8, 1), dtype=np.float32)
+    AO = np.full((8, 8, 1), 0.9, dtype=np.float32)
+    out = downsample_asset((A, N, R, M, AO), factor=2)
+    A_box = box_downsample(A, factor=2)
+    assert out[0].max() > A_box.max()  # DPID preserves the outlier more than box

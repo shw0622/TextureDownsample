@@ -27,7 +27,7 @@ def downsample_asset(
     albedo: DPID(lam=1.0, support=4, 无锐化)
     normal: box + 重归一化
     roughness: LEAN 方差补偿（依赖高分 N）
-    metallic: threshold(二值, 默认) 或 avg(box 平均)
+    metallic: threshold(二值, 阈值固定 0.5, 默认) 或 avg(box 平均)
     ao: box 平均
     """
     if metal_mode not in ("threshold", "avg"):
@@ -37,6 +37,8 @@ def downsample_asset(
 
     A_lr = dpid_downsample(A_hr, lam=_DPID_LAM, support=_DPID_SUPPORT, factor=factor)
     N_lr = downsample_normal(N_hr, factor=factor)
+    # 必须传 N_hr（高分）：downsample_roughness_lean 内部自己做 box(N_hr) 算
+    # LEAN sigma^2。传 N_lr 会得到静默错误的方差补偿。
     R_lr = downsample_roughness_lean(R_hr, N_hr, factor=factor)
     if metal_mode == "threshold":
         M_lr = downsample_metallic(M_hr, threshold=0.5, factor=factor)
