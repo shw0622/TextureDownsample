@@ -89,6 +89,7 @@ def load_asset(asset_dir: Path) -> tuple[PBRSet, str, str, str]:
     folder = _texture_dir(Path(asset_dir))
 
     # prefer character (_d/_n suffix), then packed (d/n token)
+    # layout 由匹配到的文件名推断，规则与 detect_layout() 一致：_d/_n 后缀=character，否则 d/n token=packed
     p_d = _find_by_suffix(folder, "_d")
     p_n = _find_by_suffix(folder, "_n")
     if p_d is not None and p_n is not None:
@@ -99,7 +100,7 @@ def load_asset(asset_dir: Path) -> tuple[PBRSet, str, str, str]:
         layout = "packed"
 
     if p_d is None or p_n is None:
-        raise FileNotFoundError(f"missing _d/_n packed textures in {folder}")
+        raise FileNotFoundError(f"no _d/_n textures found in {folder}")
 
     raw_d = _to01(iio.imread(str(p_d)))
     raw_n = _to01(iio.imread(str(p_n)))
@@ -142,7 +143,8 @@ def save_asset(
     d_stem: str,
     n_stem: str,
 ) -> None:
-    """Write (A,N,R,M,AO) back in the same packed layout it was loaded from."""
+    """Write (A,N,R,M,AO) back in the same packed layout it was loaded from.
+    输出始终为 8-bit uint8（dataset 贴图惯例）；16-bit 源贴图保存时会量化到 8-bit。"""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     A, N, R, M, AO = pbr
@@ -154,11 +156,13 @@ def save_asset(
     M01 = np.clip(M, 0.0, 1.0)
     AO01 = np.clip(AO, 0.0, 1.0)
 
-    d_rgba = np.concatenate([A_srgb, AO01], axis=-1)            # RGB albedo + A=AO
     if layout == "character":
+        # character: _d 无 AO 通道，写 3 通道 RGB；_n = R=metal,G=nx,B=rough,A=ny
+        d_out = A_srgb
         n_rgba = np.concatenate([M01, nx01, R01, ny01], axis=-1)
-    else:  # packed
+    else:  # packed: _d = RGB albedo + A=AO ; _n = R=nx,G=ny,B=rough,A=metal
+        d_out = np.concatenate([A_srgb, AO01], axis=-1)
         n_rgba = np.concatenate([nx01, ny01, R01, M01], axis=-1)
 
-    iio.imwrite(str(out_dir / f"{d_stem}.png"), _u8(d_rgba))
+    iio.imwrite(str(out_dir / f"{d_stem}.png"), _u8(d_out))
     iio.imwrite(str(out_dir / f"{n_stem}.png"), _u8(n_rgba))
