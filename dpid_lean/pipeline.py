@@ -1,4 +1,4 @@
-"""顶层管线：dpid albedo + LEAN roughness + normal/metal/ao 下采样（无优化）。"""
+"""顶层管线：dpid albedo + LEAN roughness + normal/metal/ao 下采样。"""
 from __future__ import annotations
 
 import numpy as np
@@ -36,8 +36,6 @@ def downsample_asset(
 
     A_lr = dpid_downsample(A_hr, lam=_DPID_LAM, support=_DPID_SUPPORT, factor=factor)
     N_lr = downsample_normal(N_hr, factor=factor)
-    # 必须传 N_hr（高分）：downsample_roughness_lean 内部自己做 box(N_hr) 算
-    # LEAN sigma^2。传 N_lr 会得到静默错误的方差补偿。
     R_lr = downsample_roughness_lean(R_hr, N_hr, factor=factor)
     if metal_mode == "threshold":
         M_lr = downsample_metallic(M_hr, threshold=0.5, factor=factor)

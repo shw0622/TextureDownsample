@@ -4,3 +4,6 @@ __pycache__/
 out/
 *.egg-info/
 smoke_out/
+out_*
+test*/
+dataset*/

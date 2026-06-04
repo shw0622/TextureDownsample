@@ -1,6 +1,6 @@
 """PBR 5 通道下采样：normal / roughness(LEAN) / metallic / ao。
 
-提取自 pbr_compress/analytic.py。roughness 用 LEAN 各向同性近似（Dupuy 2013），把
+roughness 用 LEAN 各向同性近似（Dupuy 2013），把
 footprint 内法线方差吸收进粗糙度。
 """
 from __future__ import annotations
