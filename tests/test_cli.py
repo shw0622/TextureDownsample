@@ -52,3 +52,15 @@ def test_cli_missing_textures_errors(tmp_path):
         cwd=str(PROJECT), capture_output=True, text=True,
     )
     assert result.returncode != 0
+
+
+def test_cli_bad_factor_errors(tmp_path):
+    asset = tmp_path / "myasset"
+    _make_character_asset(asset)
+    result = subprocess.run(
+        [sys.executable, str(PROJECT / "run.py"),
+         "--src-dir", str(asset), "--out", str(tmp_path / "out"), "--factor", "1"],
+        cwd=str(PROJECT), capture_output=True, text=True,
+    )
+    assert result.returncode == 2          # clean argparse error, not a traceback
+    assert "Traceback" not in result.stderr  # must NOT leak an unguarded exception

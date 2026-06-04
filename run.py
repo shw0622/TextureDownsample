@@ -31,6 +31,9 @@ def main(argv: list[str] | None = None) -> int:
                    help="metallic 下采样模式，默认 threshold（二值）")
     args = p.parse_args(argv)
 
+    if args.factor < 2:
+        p.error("--factor 必须 >= 2")
+
     src_dir = args.src_dir
     if not src_dir.is_dir():
         print(f"[dpid_lean] src-dir not found: {src_dir}", file=sys.stderr)
