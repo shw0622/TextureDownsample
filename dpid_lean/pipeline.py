@@ -20,10 +20,12 @@ def downsample_asset(
     pbr: PBRSet,
     factor: int = 2,
     metal_mode: str = "threshold",
+    lam: float = _DPID_LAM,
+    support: int = _DPID_SUPPORT,
 ) -> PBRSet:
     """对一组高分 PBR 通道做 factor× 下采样，返回低分 (A,N,R,M,AO)。
 
-    albedo: DPID(lam=1.0, support=4, 无锐化)
+    albedo: DPID(lam, support)
     normal: box + 重归一化
     roughness: LEAN 方差补偿（依赖高分 N）
     metallic: threshold(二值, 阈值固定 0.5, 默认) 或 avg(box 平均)
@@ -34,7 +36,7 @@ def downsample_asset(
 
     A_hr, N_hr, R_hr, M_hr, AO_hr = pbr
 
-    A_lr = dpid_downsample(A_hr, lam=_DPID_LAM, support=_DPID_SUPPORT, factor=factor)
+    A_lr = dpid_downsample(A_hr, lam=lam, support=support, factor=factor)
     N_lr = downsample_normal(N_hr, factor=factor)
     R_lr = downsample_roughness_lean(R_hr, N_hr, factor=factor)
     if metal_mode == "threshold":

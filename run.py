@@ -28,7 +28,11 @@ def main(argv: list[str] | None = None) -> int:
                    help="输出根目录，默认 ./out")
     p.add_argument("--factor", type=int, default=2, help="下采样倍数，默认 2")
     p.add_argument("--metal", choices=["threshold", "avg"], default="threshold",
-                   help="metallic 下采样模式，默认 threshold（二值）")
+                    help="metallic 下采样模式，默认 threshold（二值）")
+    p.add_argument("--lam", type=float, default=1.0,
+                    help="DPID lambda 参数，控制细节保留强度，默认 1.0")
+    p.add_argument("--support", type=int, default=4,
+                    help="DPID support 参数，局部均值窗口大小，默认 4")
     args = p.parse_args(argv)
 
     if args.factor < 2:
@@ -45,8 +49,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[dpid_lean] load failed: {e}", file=sys.stderr)
         return 2
 
-    print(f"[dpid_lean] {src_dir} layout={layout} factor={args.factor} metal={args.metal}")
-    lr = downsample_asset(pbr, factor=args.factor, metal_mode=args.metal)
+    print(f"[dpid_lean] {src_dir} layout={layout} factor={args.factor} metal={args.metal} lam={args.lam} support={args.support}")
+    lr = downsample_asset(pbr, factor=args.factor, metal_mode=args.metal, lam=args.lam, support=args.support)
 
     asset = _asset_name(src_dir)
     out_dir = args.out / asset
